@@ -1,0 +1,14 @@
+numpy
+matplotlib
+datetime
+empyrical
+quantstats
+yfinance
+ipython
+fpdf
+pyportfolioopt
+darts
+prophet
+pandas
+cvxpy
+scikit-learn

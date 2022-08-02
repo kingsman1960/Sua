@@ -1,0 +1,8 @@
+README.md
+setup.py
+sua.py
+sua.egg-info/PKG-INFO
+sua.egg-info/SOURCES.txt
+sua.egg-info/dependency_links.txt
+sua.egg-info/requires.txt
+sua.egg-info/top_level.txt

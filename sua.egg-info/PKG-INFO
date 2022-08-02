@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: sua
+Version: 1.0.8
+Summary: Stochastic Unified Assistant (a.k.a SUA).  It calculates the automatic portfolio optimazation, the prediction and the other stats.
+Home-page: https://https://github.com/kingsman1960/Sua
+Author: Youngwon Cho
+Author-email: youngwon.cho@tum.de
+License: MIT
+Platform: UNKNOWN
+Description-Content-Type: text/markdown
+
+Stochastic Unified Assistant (a.k.a SUA) is originally made for automatic prediction and analysis of the selected portfolio.
+
+

@@ -8,6 +8,7 @@ import copy
 import yfinance as yf
 from fpdf import FPDF
 import warnings
+#import filterwarnings
 
 # Using Python library with performance and risk statistics commonly used in quantitative finance.
 from empyrical import (
@@ -33,7 +34,7 @@ from pypfopt import (
 
 # Importing prediction models, metrics and logging
 from prophet import Prophet
-from darts.models import*
+from darts.models import *
 from darts import TimeSeries
 from darts.utils.missing_values import fill_missing_values
 from darts.metrics import mape, mase
@@ -67,11 +68,12 @@ class Start:
     def __init__(
         self,
         start_date,
+        end_date,
         portfolio,
         weights=None,
         rebalance=None,
         benchmark=None,
-        end_date=TODAY,
+
         optimizer=None,
         max_vol=0.15,
         diversification=1,
@@ -129,7 +131,7 @@ class Start:
             )
 
 
-def get_returns(stocks, wts, start_date, end_date=TODAY):
+def get_returns(stocks, wts, start_date, end_date):
     if len(stocks) > 1:
         assets = yf.download(stocks, start=start_date,
                              end=end_date, progress=False)["Adj Close"]
@@ -763,7 +765,7 @@ def valid_range(start_date, end_date, rebalance) -> tuple:
     start_date = dt.datetime.strptime(start_date, "%Y-%m-%d")
 
     # have to make end date a datetime because strptime is not supported for date
-    end_date = dt.datetime(end_date.year, end_date.month, end_date.day)
+    end_date = dt.datetime.strptime(end_date, '%Y-%m-%d')
 
     # gets the number of days
     days = (end_date - start_date).days
@@ -837,7 +839,7 @@ def make_rebalance(
     for i in range(len(dates) - 1):
 
         try:
-            portfolio = Engine(
+            portfolio = Start(
                 start_date=dates[0],
                 end_date=dates[i + 1],
                 portfolio=portfolio_input,
@@ -850,7 +852,7 @@ def make_rebalance(
             )
 
         except TypeError:
-            portfolio = Engine(
+            portfolio = Start(
                 start_date=dates[0],
                 end_date=dates[i + 1],
                 portfolio=portfolio_input,
@@ -866,7 +868,7 @@ def make_rebalance(
 
     # we have to run it one more time to get what the optimization is for up to today's date
     try:
-        portfolio = Engine(
+        portfolio = Start(
             start_date=dates[0],
             portfolio=portfolio_input,
             weights=allocation,
@@ -878,7 +880,7 @@ def make_rebalance(
         )
 
     except TypeError:
-        portfolio = Engine(
+        portfolio = Start(
             start_date=dates[0],
             portfolio=portfolio_input,
             weights=allocation,
@@ -1260,11 +1262,13 @@ def get_report(my_portfolio, rf=0.0, sigma_value=1, confidence_value=0.95, filen
     pdf.output(dest="F", name=filename)
 
 
-def geronimo(portfolio, start_date, weights=None, prediction_days=None, based_on='Adj Close'):
+def prediction(portfolio, start_date, end_date, weights=None, prediction_days=None, based_on='Adj Close'):
     print("Collecting datas...")
     # define weights
     if weights == None:
         weights = [1.0 / len(portfolio)] * len(portfolio)
+
+    end_date = dt.datetime.strptime(end_date, '%Y-%m-%d')
 
     # define today
     today = dt.datetime.today().strftime('%Y-%m-%d')
@@ -1272,7 +1276,7 @@ def geronimo(portfolio, start_date, weights=None, prediction_days=None, based_on
     # clean output from warning
     logger = logging.getLogger()
     warnings.simplefilter(action='ignore', category=FutureWarning)
-    filterwarnings('ignore')
+    warnings.filterwarnings("ignore")
 
     logging.disable(logging.INFO)
 
@@ -1291,7 +1295,7 @@ def geronimo(portfolio, start_date, weights=None, prediction_days=None, based_on
     for asset in portfolio:
 
         result = pd.DataFrame()
-        df = yf.download(asset, start=start_date, end=today,
+        df = yf.download(asset, start=start_date, end=end_date,
                          progress=False)["Adj Close"]
         df = pd.DataFrame(df)
         df.reset_index(level=0, inplace=True)
